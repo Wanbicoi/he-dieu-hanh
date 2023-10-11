@@ -18,3 +18,4 @@ user/usys.S
 
 .cache
 compile_commands.json
+.clangd
