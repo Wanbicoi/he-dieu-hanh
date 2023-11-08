@@ -1,0 +1,27 @@
+Using gdb (easy)
+
+1. Looking at the backtrace output, which function called syscall?
+ - usertrap() at kernel/trap.c:67
+
+2. What is the value of p->trapframe->a7 and what does that value represent? (Hint: look user/initcode.S, the first user program xv6 starts.)
+Trong tệp initcode.S, p->trapframe->a7 được nạp với giá trị SYS_exec = 7. Giá trị này đại diện cho system call number cho hệ thống gọi exec. Khi một chương trình người dùng khởi động (trong trường hợp này, chương trình /init), nó cần gọi SYS_exec để bắt đầu tiến trình người dùng ban đầu. Giá trị SYS_exec trong a7 xác định rằng hệ thống gọi này sẽ được gọi, và kernel sẽ thực hiện trình xử lý hệ thống exec để nạp chương trình /init như là tiến trình người dùng ban đầu.
+
+3. What was the previous mode that the CPU was in?
+(gdb) p /x $sstatus $1 = 0x22
+(Trong kiến trúc RISC-V, sstatus lưu trữ các cờ và thông tin trạng thái của trình điều khiển. Để tìm hiểu chế độ trước đó mà CPU đang chạy, chúng ta cần kiểm tra bit SPP (Supervisor Previous Privilege) trong sstatus.
+Trong trường hợp này, giá trị 0x22 cho sstatus có bit SPP được đặt thành 0 (trạng thái trước đó là supervisor mode), vì vậy CPU trước đó đang ở chế độ supervisor mode.)
+
+=> Chế độ trước đó mà CPU đang chạy là "Supervisor mode" (chế độ giám sát).
+
+4. Write down the assembly instruction the kernel is panicing at. Which register corresponds to the varialable num?
+- Trong file kernel/kernel.asm:
+
+  num = *(int *)0;
+    80002b4e:	00002683          	lw	a3,0(zero) # 0 <_entry-0x80000000>
+
+=> Assembly instruction mà kernel gặp sự cố là lw a3,0(zero), và thanh ghi tương ứng với biến num là a3
+
+5. Why does the kernel crash? Hint: look at figure 3-3 in the text; is address 0 mapped in the kernel address space? Is that confirmed by the value in scause above? (See description of scause in RISC-V privileged instructions)
+
+
+6. What is the name of the binary that was running when the kernel paniced? What is its process id (pid)?
